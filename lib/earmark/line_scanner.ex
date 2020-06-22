@@ -155,7 +155,12 @@ defmodule Earmark.LineScanner do
         [_, tag] = match
         %Line.HtmlOpenTag{tag: tag, content: line, indent: 0}
 
-      match = !recursive && Regex.run(~r/\A(\s{0,3})<\/([-\w]+?)>/, line) ->
+      # Is there potential for a DoS attack here, must check this match against
+      # input like:
+      #    "a</x</x</x</x ..." will it back up n time or is it clever enough
+      #    to check for a match at the end first?
+      #    Does not look like it, but who knows
+      match = !recursive && Regex.run(~r/\A(\s{0,3}).*<\/([-\w]+)>.*\z/, line) ->
         [_, leading_spaces, tag] = match
         %Line.HtmlCloseTag{tag: tag, indent: String.length(leading_spaces)}
 

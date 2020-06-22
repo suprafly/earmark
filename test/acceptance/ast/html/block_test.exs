@@ -226,9 +226,16 @@ defmodule Acceptance.Ast.Html.BlockTest do
 
       assert as_ast(markdown) == {:error, ast, messages}
     end
-    test "however, this closes and keeps the garbage" do
+    test "new rule (tribute to, you know...) closing tag must be last one, but it ain't necessarily so (yet another tribute)" do
       markdown = "<div>\nline\n</div><hello>"
-      ast      = [{"div", [], ["line"], @verbatim}, "<hello>"]
+      ast      = [{"div", '', ["line"], %{meta: %{verbatim: true}}}, "<hello>"]
+      messages = [{:warning, 1, "Failed to find closing <div>"}]
+
+      assert as_ast(markdown) == {:error, ast, messages}
+    end
+    test "new rule (tribute to, you know...) closing tag must be last one, and is" do
+      markdown = "<div>\nline\n</hello></div>"
+      ast      = [{"div", [], ["line", "</hello>"], @verbatim}]
       messages = []
 
       assert as_ast(markdown) == {:ok, ast, messages}
