@@ -72,6 +72,18 @@ defmodule Earmark.Transform do
       _to_html(children, Map.put(options, :smartypants, false), level, verbatim),
       "</pre>", maybe_add_newline(options)]
   end
+  defp _to_html({"details", atts, [summary | children], meta}, options, level, _verbatim) do
+    with body <- Enum.join(children, "\n"),
+         {status, ast, messages} <- EarmarkParser.as_ast(body, []),
+         transormed <- _to_html(ast, options, level)
+    do
+      [ make_indent(options, level),
+        open_tag("details", atts),
+        summary,
+        transormed,
+        "</details>", maybe_add_newline(options)]
+    end
+  end
   defp _to_html({tag, atts, children, meta}, options, level, _verbatim) do
     verbatim = meta |> Map.get(:verbatim, false)
     [ make_indent(options, level),
